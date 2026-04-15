@@ -1,27 +1,42 @@
+# ======================================================================
+# 📦 Terraform Docs конфигурация (ROOT проекта)
+# ======================================================================
+
 version: "0.21.0"
 
 formatter: "markdown table"
 
 output:
+  # Итоговый файл общей документации проекта
   file: "../docs/DIRECTORY_STRUCTURE.md"
+
+  # inject — обновляет только блок BEGIN/END
   mode: "inject"
 
+# ======================================================================
+# Какие секции показывать в документации
+# ======================================================================
 sections:
   show:
-    - requirements
-    - providers
-    - resources
-    - inputs
-    - outputs
+    - requirements  # версия Terraform и провайдеров
+    - providers     # используемые провайдеры
+    - resources     # ресурсы инфраструктуры
+    - inputs        # входные параметры root модуля
+    - outputs       # выходные значения
 
+# ======================================================================
+# Настройки форматирования таблиц
+# ======================================================================
 settings:
-  anchor: true
-  default: true
-  escape: false
-  indent: 2
+  anchor: true          # генерация якорей для навигации
+  default: true         # дефолтные правила terraform-docs
+  escape: false         # не экранировать markdown символы
+  indent: 2             # читаемые отступы
 
   sort:
-    enabled: true
-    by: required
+    enabled: true       # сортировка таблиц
+    by: required        # required inputs сверху
 
-  type: true
+  type: true            # показывать типы переменных
+
+  lockfile: true        # учитывать terraform.lock.hcl
