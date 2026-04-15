@@ -1,0 +1,27 @@
+version: "0.21.0"
+
+formatter: "markdown table"
+
+output:
+  file: "../docs/DIRECTORY_STRUCTURE.md"
+  mode: "inject"
+
+sections:
+  show:
+    - requirements
+    - providers
+    - resources
+    - inputs
+    - outputs
+
+settings:
+  anchor: true
+  default: true
+  escape: false
+  indent: 2
+
+  sort:
+    enabled: true
+    by: required
+
+  type: true
