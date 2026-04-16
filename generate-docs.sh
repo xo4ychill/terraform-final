@@ -65,17 +65,7 @@ if [ ! -f "${ROOT_DOC}" ]; then
   cat > "${ROOT_DOC}" <<EOF
 # 📦 Terraform Infrastructure
 
----
-
-## 📚 Автоматически сгенерированная документация
-
----
-
-## 🌳 Структура проекта
-
-\`\`\`
-${PROJECT_TREE}
-\`\`\`
+Production-ready Terraform modules and infrastructure.
 
 ---
 
