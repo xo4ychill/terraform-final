@@ -1,26 +1,40 @@
+# ======================================================================
+# 📦 Terraform Docs конфигурация для модулей (Registry-style)
+# ======================================================================
+
 formatter: "markdown table"
 
 output:
+  # README.md внутри каждого модуля
   file: "README.md"
+
+  # inject — вставляет только в блоки BEGIN/END
   mode: "inject"
 
+# ======================================================================
+# Какие секции генерировать
+# ======================================================================
 sections:
   show:
-    - header
-    - requirements
-    - providers
-    - resources
-    - inputs
-    - outputs
+    - header        # заголовок модуля
+    - requirements  # версии Terraform и провайдеров
+    - providers     # используемые провайдеры
+    - resources     # ресурсы модуля
+    - inputs        # входные переменные
+    - outputs       # выходные значения
 
+# ======================================================================
+# Настройки форматирования
+# ======================================================================
 settings:
-  anchor: true
-  default: true
-  escape: false
-  indent: 2
+  anchor: true          # ссылки на секции (#inputs и т.д.)
+  default: true        # стандартное поведение terraform-docs
+  escape: false        # не экранировать markdown
+
+  indent: 2            # отступы в таблицах
 
   sort:
-    enabled: true
-    by: required
+    enabled: true      # включить сортировку
+    by: required       # сначала required inputs
 
-  type: true
+  type: true           # показывать типы переменных
