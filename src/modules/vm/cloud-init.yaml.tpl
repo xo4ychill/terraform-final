@@ -1,8 +1,4 @@
 #cloud-config
-# ======================================================================
-# Cloud-Init: автоматическая настройка ВМ при первом запуске
-# ======================================================================
-
 users:
   - name: yc-user
     groups: sudo, docker
@@ -22,7 +18,11 @@ packages:
   - lsb-release
 
 runcmd:
-  # ----- Установка Docker -----
+  # 1. Создание рабочего каталога (первым делом)
+  - mkdir -p /opt/app
+  - chown yc-user:yc-user /opt/app
+
+  # 2. Установка Docker
   - |
     install -m 0755 -d /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -32,20 +32,19 @@ runcmd:
     apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     systemctl enable --now docker containerd
 
-  # ----- Авторизация в Container Registry через IAM-токен из метаданных -----
+  # 3. Авторизация в Container Registry (IAM-токен)
   - |
-    IAM_TOKEN=$(curl -s -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token | jq -r .access_token)
-    if [ -n "$IAM_TOKEN" ] && [ "$IAM_TOKEN" != "null" ]; then
-      echo "$IAM_TOKEN" | docker login --username iam --password-stdin cr.yandex
-    fi
+    for i in $(seq 1 5); do
+      IAM_TOKEN=$(curl -s -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token | jq -r .access_token)
+      if [ -n "$IAM_TOKEN" ] && [ "$IAM_TOKEN" != "null" ]; then
+        echo "$IAM_TOKEN" | docker login --username iam --password-stdin cr.yandex && break
+      fi
+      sleep 5
+    done
 
-  # ----- Создание рабочего каталога приложения -----
-  - mkdir -p /opt/app
-  - chown yc-user:yc-user /opt/app
-
-  # ----- Файл .env с переменными окружения -----
+  # 4. Создание .env файла
   - |
-    cat > /opt/app/.env << ENVEOF
+    cat > /opt/app/.env << 'ENVEOF'
     DB_HOST=${DB_HOST}
     DB_PORT=${DB_PORT}
     DB_NAME=${DB_NAME}
@@ -56,13 +55,12 @@ runcmd:
     chmod 600 /opt/app/.env
     chown yc-user:yc-user /opt/app/.env
 
-  # ----- Скрипт запуска приложения -----
+  # 5. Скрипт запуска приложения
   - |
     cat > /opt/app/start-app.sh << 'SCRIPTEOF'
     #!/bin/bash
     set -e
     cd /opt/app
-    # Обновление токена при необходимости
     IAM_TOKEN=$(curl -s -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token | jq -r .access_token)
     if [ -n "$IAM_TOKEN" ] && [ "$IAM_TOKEN" != "null" ]; then
       echo "$IAM_TOKEN" | docker login --username iam --password-stdin cr.yandex > /dev/null 2>&1
@@ -72,7 +70,7 @@ runcmd:
     chmod +x /opt/app/start-app.sh
     chown yc-user:yc-user /opt/app/start-app.sh
 
-  # ----- docker-compose.yml -----
+  # 6. docker-compose.yml
   - |
     cat > /opt/app/docker-compose.yml << 'COMPOSEEOF'
     services:
@@ -102,7 +100,7 @@ runcmd:
     COMPOSEEOF
     chown yc-user:yc-user /opt/app/docker-compose.yml
 
-  # ----- systemd сервис для автозапуска -----
+  # 7. systemd сервис
   - |
     cat > /etc/systemd/system/app.service << 'SYSTEMDEOF'
     [Unit]
@@ -122,5 +120,8 @@ runcmd:
     SYSTEMDEOF
     systemctl daemon-reload
     systemctl enable app.service
+
+  # 8. Запуск приложения
+  - systemctl start app.service
 
 final_message: "🎉 Cloud-init завершён."
