@@ -1,6 +1,6 @@
 #cloud-config
 # ======================================================================
-# Cloud-Init: Установка Docker и базовых зависимостей
+# Cloud-Init: автоматическая настройка ВМ при первом запуске
 # ======================================================================
 
 users:
@@ -22,7 +22,7 @@ packages:
   - lsb-release
 
 runcmd:
-  # Установка Docker
+  # ----- Установка Docker -----
   - |
     install -m 0755 -d /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -32,11 +32,18 @@ runcmd:
     apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     systemctl enable --now docker containerd
 
-  # Создание каталога приложения
+  # ----- Авторизация в Container Registry через IAM-токен из метаданных -----
+  - |
+    IAM_TOKEN=$(curl -s -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token | jq -r .access_token)
+    if [ -n "$IAM_TOKEN" ] && [ "$IAM_TOKEN" != "null" ]; then
+      echo "$IAM_TOKEN" | docker login --username iam --password-stdin cr.yandex
+    fi
+
+  # ----- Создание рабочего каталога приложения -----
   - mkdir -p /opt/app
   - chown yc-user:yc-user /opt/app
 
-  # Создание .env файла с переменными окружения
+  # ----- Файл .env с переменными окружения -----
   - |
     cat > /opt/app/.env << ENVEOF
     DB_HOST=${DB_HOST}
@@ -49,22 +56,25 @@ runcmd:
     chmod 600 /opt/app/.env
     chown yc-user:yc-user /opt/app/.env
 
-  # Скрипт запуска приложения
+  # ----- Скрипт запуска приложения -----
   - |
     cat > /opt/app/start-app.sh << 'SCRIPTEOF'
     #!/bin/bash
     set -e
     cd /opt/app
+    # Обновление токена при необходимости
+    IAM_TOKEN=$(curl -s -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token | jq -r .access_token)
+    if [ -n "$IAM_TOKEN" ] && [ "$IAM_TOKEN" != "null" ]; then
+      echo "$IAM_TOKEN" | docker login --username iam --password-stdin cr.yandex > /dev/null 2>&1
+    fi
     docker compose up -d
-    echo "✅ Приложение запущено"
     SCRIPTEOF
     chmod +x /opt/app/start-app.sh
     chown yc-user:yc-user /opt/app/start-app.sh
 
-  # Создание docker-compose.yml
+  # ----- docker-compose.yml -----
   - |
     cat > /opt/app/docker-compose.yml << 'COMPOSEEOF'
-    version: "3.9"
     services:
       web:
         image: ${REGISTRY_URL}/app:latest
@@ -86,21 +96,19 @@ runcmd:
           timeout: 5s
           retries: 3
           start_period: 10s
-
     networks:
       app-network:
         driver: bridge
     COMPOSEEOF
     chown yc-user:yc-user /opt/app/docker-compose.yml
 
-  # Автозапуск приложения через systemd
+  # ----- systemd сервис для автозапуска -----
   - |
     cat > /etc/systemd/system/app.service << 'SYSTEMDEOF'
     [Unit]
-    Description=Application Docker Compose Service
+    Description=App Service
     After=docker.service network-online.target
     Requires=docker.service
-
     [Service]
     Type=oneshot
     RemainAfterExit=yes
@@ -109,11 +117,10 @@ runcmd:
     EnvironmentFile=/opt/app/.env
     ExecStart=/opt/app/start-app.sh
     ExecStop=/usr/bin/docker compose down
-
     [Install]
     WantedBy=multi-user.target
     SYSTEMDEOF
     systemctl daemon-reload
     systemctl enable app.service
 
-final_message: "🎉 Cloud-init завершён. Приложение будет доступно по внешнему IP ВМ."
+final_message: "🎉 Cloud-init завершён."

@@ -2,6 +2,24 @@
 # main.tf — ОСНОВНАЯ КОНФИГУРАЦИЯ ИНФРАСТРУКТУРЫ
 # ======================================================================
 
+# ==================== БАКЕТ ДЛЯ REMOTE STATE ====================
+# Создаёт бакет в Object Storage для хранения terraform.tfstate
+module "state_bucket" {
+  source = "./modules/bucket"
+
+  bucket_name = var.state_bucket_name
+}
+
+# ==================== IAM: СЕРВИСНЫЙ АККАУНТ ====================
+# Сервисный аккаунт, от имени которого ВМ будет получать IAM-токен
+module "iam" {
+  source = "./modules/iam"
+
+  sa_name        = "vm-sa-${var.environment}"
+  sa_description = "Сервисный аккаунт для доступа к Container Registry"
+  folder_id      = var.folder_id
+}
+
 # ==================== VPC: СЕТЬ И ПОДСЕТЬ ====================
 module "vpc" {
   source = "./modules/vpc"
@@ -17,12 +35,12 @@ module "vpc" {
 module "security" {
   source = "./modules/security"
 
-  name              = "${var.vpc_name}-sg"
-  description       = "Security group для приложения"
-  network_id        = module.vpc.network_id
-  environment       = var.environment
-  allowed_ssh_cidr  = var.allowed_ssh_cidr
-  app_subnet_cidrs  = var.v4_cidr_blocks
+  name             = "${var.vpc_name}-sg"
+  description      = "Security group для приложения"
+  network_id       = module.vpc.network_id
+  environment      = var.environment
+  allowed_ssh_cidr = var.allowed_ssh_cidr
+  app_subnet_cidrs = var.v4_cidr_blocks
 }
 
 # ==================== MANAGED MYSQL ====================
@@ -32,7 +50,7 @@ module "mysql" {
   network_id         = module.vpc.network_id
   subnet_id          = module.vpc.subnet_id
   zone               = var.default_zone
-  environment        = var.environment   # prod / staging / dev 
+  environment        = var.environment
   mysql_version      = var.mysql_version
   db_name            = var.mysql_db_name
   db_user            = var.mysql_user
@@ -59,6 +77,7 @@ module "vm" {
 
   subnet_id          = module.vpc.subnet_id
   security_group_ids = [module.security.security_group_id]
+  service_account_id = module.iam.service_account_id   # Сервисный аккаунт для авторизации в Container Registry
 
   zone               = var.default_zone
   image_family       = var.image_family
@@ -69,11 +88,11 @@ module "vm" {
   vm_disk_size       = var.vm_disk_size
   preemptible        = var.preemptible
 
-  # Передаём параметры подключения к БД и реестру для cloud-init
-  db_host     = module.mysql.db_host
-  db_port     = module.mysql.db_port
-  db_name     = var.mysql_db_name
-  db_user     = var.mysql_user
-  db_password = var.mysql_password
-  registry_url = module.registry.registry_url
+  # Параметры подключения к БД и реестру, передаваемые в cloud-init
+  db_host       = module.mysql.db_host
+  db_port       = module.mysql.db_port
+  db_name       = var.mysql_db_name
+  db_user       = var.mysql_user
+  db_password   = var.mysql_password
+  registry_url  = module.registry.registry_url
 }

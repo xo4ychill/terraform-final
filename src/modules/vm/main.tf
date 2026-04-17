@@ -1,13 +1,13 @@
 # ======================================================================
-# Модуль VM — создание виртуальной машины с cloud-init
+# Модуль VM — виртуальная машина с cloud-init
 # ======================================================================
 
 data "yandex_compute_image" "ubuntu" {
   family = var.image_family
 }
 
-# Шаблон cloud-init для первоначальной настройки ВМ
 locals {
+  # Формируем cloud-init конфигурацию, подставляя переменные
   cloud_init_content = templatefile("${path.module}/cloud-init.yaml.tpl", {
     ssh_public_key = var.ssh_public_key
     DB_HOST        = var.db_host
@@ -20,10 +20,10 @@ locals {
 }
 
 resource "yandex_compute_instance" "vm" {
-  name        = var.vm_name
-  description = "VM for ${var.project_label} in ${var.environment_label}"
-  platform_id = "standard-v3"
-  zone        = var.zone
+  name               = var.vm_name
+  platform_id        = "standard-v3"
+  zone               = var.zone
+  service_account_id = var.service_account_id   # Привязка сервисного аккаунта
 
   resources {
     cores  = var.vm_cores
@@ -40,7 +40,7 @@ resource "yandex_compute_instance" "vm" {
 
   network_interface {
     subnet_id          = var.subnet_id
-    nat                = true
+    nat                = true   # Публичный IP
     security_group_ids = var.security_group_ids
   }
 

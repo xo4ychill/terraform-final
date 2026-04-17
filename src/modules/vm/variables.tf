@@ -1,3 +1,7 @@
+variable "service_account_id" { 
+  description = "ID сервисного аккаунта для доступа к "
+  type = string 
+}
 variable "vm_name" {
   description = "Имя виртуальной машины"
   type        = string
@@ -58,7 +62,7 @@ variable "preemptible" {
   type        = bool
 }
 
-# Переменные для настройки приложения (передаются в cloud-init)
+# Переменные для настройки подключения к БД и реестру (передаются в cloud-init)
 variable "db_host" {
   description = "Хост базы данных MySQL"
   type        = string
@@ -89,3 +93,4 @@ variable "registry_url" {
   description = "URL Container Registry"
   type        = string
 }
+

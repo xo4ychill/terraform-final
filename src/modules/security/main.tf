@@ -1,5 +1,5 @@
 # ======================================================================
-# Модуль Security — создание группы безопасности
+# Модуль Security — группа безопасности
 # ======================================================================
 
 resource "yandex_vpc_security_group" "sg" {
@@ -7,57 +7,54 @@ resource "yandex_vpc_security_group" "sg" {
   description = var.description
   network_id  = var.network_id
 
-  # ----- Входящие правила (Ingress) -----
-  # SSH: только с доверенных адресов (если задан)
+  # SSH доступ (только если задан CIDR)
   dynamic "ingress" {
     for_each = var.allowed_ssh_cidr != null ? [1] : []
     content {
-      description    = "SSH access"
+      description    = "SSH"
       protocol       = "TCP"
       port           = 22
       v4_cidr_blocks = [var.allowed_ssh_cidr]
     }
   }
 
-  # HTTP: публичный доступ
   ingress {
-    description    = "HTTP access"
+    description    = "HTTP"
     protocol       = "TCP"
     port           = 80
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # HTTPS: публичный доступ
   ingress {
-    description    = "HTTPS access"
+    description    = "HTTPS"
     protocol       = "TCP"
     port           = 443
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # MySQL: только из подсети приложения
+  # MySQL — только из подсети приложения
   ingress {
-    description    = "MySQL from app subnet"
+    description    = "MySQL"
     protocol       = "TCP"
     port           = 3306
     v4_cidr_blocks = var.app_subnet_cidrs
   }
 
-  # ----- Исходящие правила (Egress) -----
+  # Исходящий трафик
   egress {
-    description    = "HTTPS outbound"
+    description    = "HTTPS out"
     protocol       = "TCP"
     port           = 443
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
-    description    = "HTTP outbound"
+    description    = "HTTP out"
     protocol       = "TCP"
     port           = 80
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
-    description    = "DNS outbound"
+    description    = "DNS"
     protocol       = "UDP"
     port           = 53
     v4_cidr_blocks = ["0.0.0.0/0"]

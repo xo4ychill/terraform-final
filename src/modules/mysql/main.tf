@@ -1,6 +1,9 @@
+# ======================================================================
+# Модуль MySQL — Yandex Managed Service for MySQL
+# ======================================================================
+
 resource "yandex_mdb_mysql_cluster" "cluster" {
   name        = "${var.environment}-mysql-cluster"
-  # Для ресурса MySQL environment должно быть PRODUCTION или PRESTABLE
   environment = var.environment == "prod" ? "PRODUCTION" : "PRESTABLE"
   network_id  = var.network_id
   version     = var.mysql_version
@@ -33,13 +36,33 @@ resource "yandex_mdb_mysql_cluster" "cluster" {
   }
 
   security_group_ids = var.security_group_ids
+  labels = { environment = var.environment }
+  lifecycle { prevent_destroy = true }
+}
 
-  # Метки должны содержать только строчные буквы, цифры и разрешённые символы
-  labels = {
-    environment = var.environment   # prod, staging, dev (уже строчными)
+resource "yandex_mdb_mysql_database" "database" {
+  cluster_id = yandex_mdb_mysql_cluster.cluster.id
+  name       = var.db_name
+}
+
+resource "yandex_mdb_mysql_user" "user" {
+  depends_on = [yandex_mdb_mysql_database.database]
+
+  cluster_id = yandex_mdb_mysql_cluster.cluster.id
+  name       = var.db_user
+  password   = var.db_password
+
+  permission {
+    database_name = var.db_name
+    roles         = ["ALL"]
   }
 
-  lifecycle {
-    prevent_destroy = true
+  global_permissions = ["PROCESS", "REPLICATION_CLIENT"]
+
+  connection_limits {
+    max_questions_per_hour   = 0
+    max_updates_per_hour     = 0
+    max_connections_per_hour = 0
+    max_user_connections     = 10
   }
 }

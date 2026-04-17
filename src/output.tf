@@ -2,28 +2,18 @@
 # outputs.tf — Вывод результатов после terraform apply
 # ======================================================================
 
-output "vpc_network_id" {
-  description = "ID созданной сети VPC"
-  value       = module.vpc.network_id
-}
-
-output "vpc_subnet_id" {
-  description = "ID созданной подсети"
-  value       = module.vpc.subnet_id
-}
-
-output "security_group_id" {
-  description = "ID группы безопасности"
-  value       = module.security.security_group_id
+output "state_bucket_name" {
+  description = "Фактическое имя созданного бакета для remote state"
+  value       = module.state_bucket.bucket_name
 }
 
 output "vm_external_ip" {
-  description = "Внешний IP-адрес ВМ"
+  description = "Внешний IP-адрес виртуальной машины"
   value       = module.vm.external_ip
 }
 
 output "vm_internal_ip" {
-  description = "Внутренний IP-адрес ВМ"
+  description = "Внутренний IP-адрес виртуальной машины"
   value       = module.vm.internal_ip
 }
 
@@ -46,4 +36,9 @@ output "registry_url" {
 output "registry_id" {
   description = "ID Container Registry"
   value       = module.registry.registry_id
+}
+
+output "vm_service_account_id" {
+  description = "ID сервисного аккаунта, привязанного к ВМ"
+  value       = module.iam.service_account_id
 }
