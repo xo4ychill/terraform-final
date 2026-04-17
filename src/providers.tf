@@ -16,7 +16,7 @@ terraform {
   # ВНИМАНИЕ: для первого запуска закомментируйте этот блок, создайте бакет,
   # затем раскомментируйте и выполните 'terraform init -reconfigure'.
   backend "s3" {
-    bucket = "tf.state-bucket-mpj2e8ih"   # ← замените на реальное имя бакета после создания
+    bucket = "tf.state-bucket"   # ← замените на реальное имя бакета после создания
     key    = "terraform.tfstate"
     region = "ru-central1"
 
