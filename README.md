@@ -1,50 +1,7 @@
 # Итоговый проект модуля «Облачная инфраструктура. Terraform»
 
-#### Структура проекта.
-src/
-├── providers.tf
-├── variables.tf
-├── terraform.tfvars.example
-├── main.tf
-├── outputs.tf
-├── Dockerfile
-├── nginx.conf
-├── app/
-│   ├── index.html
-│   ├── style.css
-│   └── info.php
-├── modules/
-│   ├── iam/
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   └── outputs.tf
-│   ├── vpc/
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   └── outputs.tf
-│   ├── security/
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   └── outputs.tf
-│   ├── vm/
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   ├── outputs.tf
-│   │   └── cloud-init.yaml.tpl
-│   ├── mysql/
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   └── outputs.tf
-│   ├── registry/
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   └── outputs.tf
-│   └── bucket/
-│       ├── main.tf
-│       ├── variables.tf
-│       └── outputs.tf
-├── scripts/
-│   └── docker-push.sh
+#### Вводная информация
+- [Структура проекта и Документация Terraform](docs/DIRECTORY_STRUCTURE.md)
 
 #### Задание 1. Развертывание инфраструктуры в Yandex Cloud.
 
