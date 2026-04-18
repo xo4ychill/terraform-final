@@ -40,11 +40,8 @@ mysql_password = "YourStrongPassword123!"
 registry_name = "app-registry"
 
 
-state_bucket_name = "tf.state-bucket"
-
-
 # --- Существующий Container Registry ---
-existing_registry_id = "crp1nhdjvh1pkotfi5l3"
+existing_registry_id = "crp1nhdjvh1pkotfi5l3"    # пример
 
 # --- S3 Backend ---
 state_bucket_name = "tf-state-bucket-xxxxxxxx"

@@ -95,7 +95,7 @@ variable "registry_url" {
 }
 
 variable "sa_key_json"  {
-  escription = "Токен сервисного аккаунта для скачивание из registry "
+  description = "Токен сервисного аккаунта для скачивание из registry "
   type = string
   sensitive = true 
 }

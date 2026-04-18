@@ -18,7 +18,7 @@ terraform {
     # Имя бакета, в котором будет лежать state-файл (уникальное, создаётся заранее)
     bucket = "tf.state-bucket-fltfpt"
     # Путь к файлу внутри бакета, используется workspace для разделения окружений
-    key    = "${terraform.workspace}/terraform.tfstate"
+    key    = "terraform.tfstate"
     region = "ru-central1"
 
     # Включаем встроенный механизм блокировки через файл блокировки в бакете (Terraform >= 1.6)
