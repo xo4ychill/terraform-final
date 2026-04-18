@@ -106,11 +106,13 @@ ${PROJECT_TREE}
 | \`src/terraform.tfvars\` | Значения переменных |
 | \`src/output.tf\` | Выходные значения |
 | \`src/modules/\` | Каталог всех Terraform модулей |
+| \`src/modules/iam\` | Создание сервисного аккаунта и права доступа для registry) |
 | \`src/modules/vpc\` | Создание сети (VPC, подсети) |
 | \`src/modules/vm\` | Виртуальные машины + cloud-init |
 | \`src/modules/mysql\` | Управляемая база данных |
 | \`src/modules/security\` | Группы безопасности |
 | \`src/modules/registry\` | Container Registry |
+| \`src/modules/bucket\` | Бэкенд для хранения terraform.tfstate |
 
 ---
 

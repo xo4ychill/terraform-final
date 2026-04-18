@@ -37,7 +37,7 @@ resource "yandex_mdb_mysql_cluster" "cluster" {
 
   security_group_ids = var.security_group_ids
   labels = { environment = var.environment }
-  lifecycle { prevent_destroy = true }
+  lifecycle { prevent_destroy = false }
 }
 
 resource "yandex_mdb_mysql_database" "database" {

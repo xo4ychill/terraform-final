@@ -1,0 +1,46 @@
+# ======================================================
+# ПРИМЕР ФАЙЛА ПЕРЕМЕННЫХ
+# Скопируйте в terraform.tfvars и заполните свои значения
+# ======================================================
+
+# --- Yandex Cloud ---
+cloud_id                 = "b1g...."
+folder_id                = "b1g....."
+default_zone             = "ru-central1-a"
+service_account_key_file = "~/.authorized_key.json"
+
+# --- Окружение ---
+environment = "dev"
+
+# --- VPC ---
+vpc_name       = "app-net"
+subnet_name    = "app-sub"
+v4_cidr_blocks = ["10.10.10.0/24"]
+
+# --- Виртуальная машина ---
+vm_name    = "vm-app"
+image_family = "ubuntu-2204-lts"
+vm_cores   = 2
+vm_memory  = 4
+vm_disk_size = 20
+preemptible     = true                     # false для prod, true для dev/staging
+
+
+# --- SSH ---
+ssh_public_key    = "ssh-ed25519 ....."
+allowed_ssh_cidr  = "x.x.x.x/x"
+
+# --- MySQL ---
+mysql_version = "8.0"
+mysql_db_name = "appdb"
+mysql_user    = "appuser"
+mysql_password = "YourStrongPassword123!"                  
+
+# --- Container Registry ---
+registry_name = "app-registry"
+
+
+state_bucket_name = "tf.state-bucket"
+
+
+
