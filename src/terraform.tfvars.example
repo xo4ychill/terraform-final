@@ -36,10 +36,6 @@ mysql_db_name = "appdb"
 mysql_user    = "appuser"
 mysql_password = "YourStrongPassword123!"                  
 
-# --- Container Registry ---
-registry_name = "app-registry"
-
-
 # --- Существующий Container Registry ---
 existing_registry_id = "crp1nhdjvh1pkotfi5l3"    # пример
 
