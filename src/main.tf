@@ -1,26 +1,38 @@
 # ======================================================================
-# main.tf — ОСНОВНАЯ КОНФИГУРАЦИЯ ИНФРАСТРУКТУРЫ
+# main.tf — ОСНОВНАЯ СБОРКА ИНФРАСТРУКТУРЫ
 # ======================================================================
 
-# ==================== БАКЕТ ДЛЯ REMOTE STATE ====================
-# Создаёт бакет в Object Storage для хранения terraform.tfstate
-module "state_bucket" {
-  source = "./modules/bucket"
-
-  bucket_name = var.state_bucket_name
+# ----- ПОЛУЧЕНИЕ ДАННЫХ О СУЩЕСТВУЮЩЕМ РЕЕСТРЕ -----
+data "yandex_container_registry" "existing" {
+  registry_id = var.existing_registry_id
 }
 
-# ==================== IAM: СЕРВИСНЫЙ АККАУНТ ====================
-# Сервисный аккаунт, от имени которого ВМ будет получать IAM-токен
-module "iam" {
-  source = "./modules/iam"
-
-  sa_name        = "vm-sa-${var.environment}"
-  sa_description = "Сервисный аккаунт для доступа к Container Registry"
-  folder_id      = var.folder_id
+# Формируем полный URL реестра для Docker
+locals {
+  registry_url = "cr.yandex/${data.yandex_container_registry.existing.id}"
 }
 
-# ==================== VPC: СЕТЬ И ПОДСЕТЬ ====================
+# ----- СЕРВИСНЫЙ АККАУНТ ДЛЯ ВИРТУАЛЬНОЙ МАШИНЫ -----
+resource "yandex_iam_service_account" "vm_sa" {
+  name        = "vm-sa-${var.environment}"
+  description = "Сервисный аккаунт для доступа к Container Registry"
+}
+
+# Выдаём роль container-registry.images.puller на существующий реестр
+resource "yandex_container_registry_iam_binding" "puller" {
+  registry_id = var.existing_registry_id
+  role        = "container-registry.images.puller"
+  members     = ["serviceAccount:${yandex_iam_service_account.vm_sa.id}"]
+}
+
+# Создаём авторизованный ключ для сервисного аккаунта.
+# Он будет передан в cloud-init и использован для настройки Docker Credential Helper.
+resource "yandex_iam_service_account_key" "vm_sa_key" {
+  service_account_id = yandex_iam_service_account.vm_sa.id
+  description        = "Ключ для Docker Credential Helper на ВМ"
+}
+
+# ----- VPC И ПОДСЕТЬ -----
 module "vpc" {
   source = "./modules/vpc"
 
@@ -31,7 +43,7 @@ module "vpc" {
   environment    = var.environment
 }
 
-# ==================== SECURITY GROUP ====================
+# ----- ГРУППА БЕЗОПАСНОСТИ -----
 module "security" {
   source = "./modules/security"
 
@@ -40,10 +52,10 @@ module "security" {
   network_id       = module.vpc.network_id
   environment      = var.environment
   allowed_ssh_cidr = var.allowed_ssh_cidr
-  app_subnet_cidrs = var.v4_cidr_blocks
+  app_subnet_cidrs = var.v4_cidr_blocks   # для доступа к MySQL
 }
 
-# ==================== MANAGED MYSQL ====================
+# ----- УПРАВЛЯЕМЫЙ MYSQL -----
 module "mysql" {
   source = "./modules/mysql"
 
@@ -58,16 +70,7 @@ module "mysql" {
   security_group_ids = [module.security.security_group_id]
 }
 
-# ==================== CONTAINER REGISTRY ====================
-module "registry" {
-  source = "./modules/registry"
-
-  name        = var.registry_name
-  folder_id   = var.folder_id
-  environment = var.environment
-}
-
-# ==================== ВИРТУАЛЬНАЯ МАШИНА ====================
+# ----- ВИРТУАЛЬНАЯ МАШИНА -----
 module "vm" {
   source = "./modules/vm"
 
@@ -77,7 +80,7 @@ module "vm" {
 
   subnet_id          = module.vpc.subnet_id
   security_group_ids = [module.security.security_group_id]
-  service_account_id = module.iam.service_account_id   # Сервисный аккаунт для авторизации в Container Registry
+  service_account_id = yandex_iam_service_account.vm_sa.id   # Привязываем сервисный аккаунт к ВМ
 
   zone               = var.default_zone
   image_family       = var.image_family
@@ -88,11 +91,14 @@ module "vm" {
   vm_disk_size       = var.vm_disk_size
   preemptible        = var.preemptible
 
-  # Параметры подключения к БД и реестру, передаваемые в cloud-init
-  db_host       = module.mysql.db_host
-  db_port       = module.mysql.db_port
-  db_name       = var.mysql_db_name
-  db_user       = var.mysql_user
-  db_password   = var.mysql_password
-  registry_url  = module.registry.registry_url
+  # Параметры подключения к БД (будут переданы в контейнер)
+  db_host            = module.mysql.db_host
+  db_port            = module.mysql.db_port
+  db_name            = var.mysql_db_name
+  db_user            = var.mysql_user
+  db_password        = var.mysql_password
+
+  # URL реестра и ключ сервисного аккаунта (в формате JSON) для cloud-init
+  registry_url       = local.registry_url
+  sa_key_json        = yandex_iam_service_account_key.vm_sa_key.private_key
 }

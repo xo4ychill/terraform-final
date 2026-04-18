@@ -1,14 +1,9 @@
 # ======================================================================
-# outputs.tf — Вывод результатов после terraform apply
+# outputs.tf — Вывод полезной информации после развёртывания
 # ======================================================================
 
-output "state_bucket_name" {
-  description = "Фактическое имя созданного бакета для remote state"
-  value       = module.state_bucket.bucket_name
-}
-
 output "vm_external_ip" {
-  description = "Внешний IP-адрес виртуальной машины"
+  description = "Внешний IP-адрес виртуальной машины (для доступа по HTTP/SSH)"
   value       = module.vm.external_ip
 }
 
@@ -18,7 +13,7 @@ output "vm_internal_ip" {
 }
 
 output "mysql_cluster_id" {
-  description = "ID кластера Managed MySQL"
+  description = "ID кластера MySQL"
   value       = module.mysql.cluster_id
 }
 
@@ -29,16 +24,11 @@ output "mysql_connection_string" {
 }
 
 output "registry_url" {
-  description = "URL Container Registry для docker push/pull"
-  value       = module.registry.registry_url
-}
-
-output "registry_id" {
-  description = "ID Container Registry"
-  value       = module.registry.registry_id
+  description = "URL Container Registry для загрузки образов"
+  value       = local.registry_url
 }
 
 output "vm_service_account_id" {
   description = "ID сервисного аккаунта, привязанного к ВМ"
-  value       = module.iam.service_account_id
+  value       = yandex_iam_service_account.vm_sa.id
 }

@@ -1,14 +1,14 @@
 # ======================================================================
 # Мультисборка для FastAPI приложения
-# Stage 1: builder — установка зависимостей
-# Stage 2: runtime — минимальный образ с приложением
 # ======================================================================
 
+# ----- STAGE 1: Сборка зависимостей -----
 FROM python:3.12-alpine AS builder
 WORKDIR /build
 COPY requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
+# ----- STAGE 2: Минимальный runtime-образ -----
 FROM python:3.12-alpine
 WORKDIR /app
 COPY --from=builder /root/.local /root/.local
