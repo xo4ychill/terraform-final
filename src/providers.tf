@@ -17,7 +17,7 @@ terraform {
   backend "s3" {
     # Имя бакета, в котором будет лежать state-файл (уникальное, создаётся заранее)
     bucket = "tf.state-bucket-fltfpt"
-    # Путь к файлу внутри бакета, используется workspace для разделения окружений
+    # Путь к файлу внутри бакета
     key    = "terraform.tfstate"
     region = "ru-central1"
 
