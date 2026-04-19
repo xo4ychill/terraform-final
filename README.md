@@ -138,7 +138,7 @@ export AWS_SECRET_ACCESS_KEY=<Ваш secret>
 #### Задание 2. Используя user-data (cloud-init), установливаем Docker и Docker Compose.
 [cloud-init](src/modules/vm/cloud-init.yaml.tpl)
 
-![cloud-init](images/cloud-init.png)
+![cloud-init](images/cloud-init!.png)
 ![docker version](images/docker_vm.png)
 
 #### Задание 3. Описание Docker файла  c web-приложением и сохранние контейнера в Container Registry.
