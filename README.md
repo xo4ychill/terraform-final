@@ -114,3 +114,5 @@ cp terraform.tfvars.example terraform.tfvars
 - Проверка соединения с БД и работы web-приложения
 
 ![alt text](images/mysql.png)
+
+- Для автоматического запуска контейнера на ВМ , после деплоя образа в Registry потребуется перезапустить ВМ, если перезагрузка нежелательна(или не возможна),то зайти на ВМ по ssh (```ssh -l yc-user $(terraform output -raw vm_external_ip)```) и произвести запуск вручную ``` sudo systemctl start app.service```
