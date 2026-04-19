@@ -143,16 +143,14 @@ runcmd:
     Requires=docker.service
 
     [Service]
-    Type=simple
+    Type=oneshot
+    RemainAfterExit=yes
     User=yc-user
     WorkingDirectory=/opt/app
     EnvironmentFile=/opt/app/.env
 
     ExecStart=/opt/app/start-app.sh
     ExecStop=/usr/bin/docker compose down
-
-    Restart=always
-    RestartSec=10
 
     [Install]
     WantedBy=multi-user.target
