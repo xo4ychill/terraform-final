@@ -94,6 +94,7 @@ cp terraform.tfvars.example terraform.tfvars
 
 #### Задание 2. Используя user-data (cloud-init), установливаем Docker и Docker Compose.
 [cloud-init](src/modules/vm/cloud-init.yaml.tpl)
+
 ![alt text](images/cloud-init.png)
 ![alt text](images/docker_vm.png)
 
