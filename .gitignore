@@ -18,7 +18,7 @@ terraform.rc
 # Variables files containing secrets
 *.tfvars
 *.tfvars.json
-terraform.tfvars
+*.terraform.tfvars
 
 # Override files
 override.tf

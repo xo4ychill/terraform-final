@@ -6,16 +6,16 @@
 #### Задание 1. Развертывание инфраструктуры в Yandex Cloud.
 
 -  Создание Virtual Private Cloud (VPC)
-Облачная сеть создаётся через модуль `modules/vpc`:
-
+![modules/vpc](images/сеть.png)
 -  Создание подсети
-
+![modules/vpc](images/подсеть.png)
 -  Создание виртуальные машины (VM):
-
+![alt text](images/vm.png)
         - Настройка группы безопасности (порты 22, 80, 443)
-
+![alt text](images/sg.png)
+![alt text](images/sg.out.png)
         - Привязываем группу безопасности к VM
-
+![alt text](images/vm.2.png)
 - Описание создания БД MySQL в Yandex Cloud
 
 - Описание создания Container Registry
