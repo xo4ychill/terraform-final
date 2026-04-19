@@ -19,6 +19,6 @@ resource "yandex_container_registry" "registry" {
 
   # Защита от случайного удаления через terraform destroy
   lifecycle {
-    prevent_destroy = false           # Рекомендуется true для production-окружений
+    prevent_destroy = true           # Рекомендуется true для production-окружений
   }
 }

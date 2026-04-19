@@ -75,7 +75,7 @@ resource "yandex_mdb_mysql_cluster" "cluster" {
 
   # Защита от случайного удаления через terraform destroy
   lifecycle {
-    prevent_destroy = false               # true для prod, false  для dev/staging
+    prevent_destroy = true               # true для prod, false  для dev/staging
   }
 }
 

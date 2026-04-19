@@ -123,6 +123,7 @@ export AWS_SECRET_ACCESS_KEY=<Ваш secret>
 - Описание создания Container Registry
     - Для хранения Docker-образов приложения в проекте используется **Yandex Container Registry**. Создание реестра описано в модуле `modules/registry/main.tf`.
     - [Основные компоненты](src/modules/registry/README.md)
+    - Включена защита от случайного удаления (`prevent_destroy = true`).
     - Параметры реестра:
     ```hcl
                 resource "yandex_container_registry" "registry" {
