@@ -36,7 +36,7 @@ variable "db_user" {
 variable "db_password" {
   description = "Пароль пользователя БД"
   type        = string
-  sensitive   = true
+  sensitive   = true           # Скрывает значение в выводе terraform plan/apply
 }
 
 variable "security_group_ids" {
