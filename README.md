@@ -105,4 +105,7 @@ cp terraform.tfvars.example terraform.tfvars
 ![alt text](images/docker_check.png)
 
 #### Задание 4. Завязываем работу приложения в контейнере на БД в Yandex Cloud.
-[Docker-compose.yml](src/docker-compose.yml)
+- [Docker-compose.yml](src/docker-compose.yml)
+- Проверка соединения с БД и работы web-приложения
+
+![alt text](images/mysql.png)
