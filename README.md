@@ -1,5 +1,18 @@
 # Итоговый проект модуля «Облачная инфраструктура. Terraform»
 
+#### Описание
+
+Проект демонстрирует полный цикл развёртывания облачной инфраструктуры с использованием **Terraform**, **Docker** и **Yandex Cloud**.  
+Реализовано:
+
+- Создание VPC, подсети, группы безопасности.
+- Управляемая база данных MySQL.
+- Container Registry для хранения Docker-образов.
+- Виртуальная машина с автоматической установкой Docker через `cloud-init`.
+- Мультисборочный Dockerfile для Python FastAPI приложения.
+- Интеграция приложения с БД.
+- Удалённое хранение Terraform state в Object Storage.
+
 #### Используемые технологии
 
 - **Terraform** (≥1.12) — Infrastructure as Code
@@ -28,6 +41,38 @@
 ```bash
 cd src
 cp terraform.tfvars.example terraform.tfvars
+```
+
+### Для удалённого хранения Terraform state в Object Storage.
+
+```
+# Создание bucket
+yc storage bucket create --name tf.state-bucket-xxxx --default-storage-class standard --public-read=false
+
+# Создание service account
+yc iam service-account create --name tf-bucket-sa
+
+# Получение ID сервисного аккаунта
+yc iam service-account get tf-bucket-sa
+
+# Назначение роли
+yc resource-manager folder add-access-binding <ID-каталога> --role editor --subject serviceAccount:<ID-аккаунта>
+
+# Создание ключа доступа
+yc iam access-key create --service-account-name tf-bucket-sa
+
+# Пример вывода:
+access_key:
+  id: aje.........
+  service_account_id: aje........
+  created_at: "2026-04-17T13:56:02.451784022Z"
+  key_id: XXXXXXXXXXXXXXXXXXXXX
+secret: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+# Для дальнейшей работы:
+export AWS_ACCESS_KEY_ID=<Ваш key_id>
+export AWS_SECRET_ACCESS_KEY=<Ваш secret>
+
 ```
 
 #### Задание 1. Развертывание инфраструктуры в Yandex Cloud.
@@ -90,8 +135,6 @@ cp terraform.tfvars.example terraform.tfvars
                         }
                 }
                 
-
-
 #### Задание 2. Используя user-data (cloud-init), установливаем Docker и Docker Compose.
 [cloud-init](src/modules/vm/cloud-init.yaml.tpl)
 
@@ -104,6 +147,7 @@ cp terraform.tfvars.example terraform.tfvars
 - [Файл зависимостей requirements.txt](src/requirements.txt)
 
 - [Cохранние контейнера в Container Registry](scripts/docker-push.sh)
+```../scripts/docker-push.sh $(terraform output -raw registry_url) latest```
 
 ![alt text](images/docker_build.png)
 ![alt text](images/docker_build2.png)
@@ -112,7 +156,9 @@ cp terraform.tfvars.example terraform.tfvars
 #### Задание 4. Завязываем работу приложения в контейнере на БД в Yandex Cloud.
 - [Docker-compose.yml](src/docker-compose.yml)
 - Проверка соединения с БД и работы web-приложения
-
+Смотрим FQDN mysql сервера ```terraform output mysql_connection_string```
+Подключаемся к ВМ по ssh (```ssh -l yc-user $(terraform output -raw vm_external_ip)```)
+смотрим работу сервиса app.service ``` sudo systemctl status app.service```
+через mysql-client (```sudo apt install mysql-client```) проверяем соединение с БД
+```mysql -h rc1a-ie1kmg2gela0etjb.mdb.yandexcloud.net -P 3306 -u appuser -p```
 ![alt text](images/mysql.png)
-
-- Для автоматического запуска контейнера на ВМ , после деплоя образа в Registry потребуется перезапустить ВМ, если перезагрузка нежелательна(или не возможна),то зайти на ВМ по ssh (```ssh -l yc-user $(terraform output -raw vm_external_ip)```) и произвести запуск вручную ``` sudo systemctl start app.service```
