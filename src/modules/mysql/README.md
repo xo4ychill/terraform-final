@@ -26,9 +26,9 @@
 
 | Name | Type |
 |------|------|
-| [yandex_mdb_mysql_cluster.cluster](https://registry.terraform.io/providers/yandex-cloud/yandex/latest/docs/resources/mdb_mysql_cluster) | resource |
-| [yandex_mdb_mysql_database.database](https://registry.terraform.io/providers/yandex-cloud/yandex/latest/docs/resources/mdb_mysql_database) | resource |
-| [yandex_mdb_mysql_user.user](https://registry.terraform.io/providers/yandex-cloud/yandex/latest/docs/resources/mdb_mysql_user) | resource |
+| [yandex_mdb_mysql_cluster.cluster](https://registry.terraform.io/providers/yandex-cloud/yandex/latest/docs/resources/mdb_mysql_cluster) | Кластер MySQL (один хост)  |
+| [yandex_mdb_mysql_database.database](https://registry.terraform.io/providers/yandex-cloud/yandex/latest/docs/resources/mdb_mysql_database) | Логическая база данных внутри кластера |
+| [yandex_mdb_mysql_user.user](https://registry.terraform.io/providers/yandex-cloud/yandex/latest/docs/resources/mdb_mysql_user) | Пользователь с правами доступа к БД |
 
 ## Inputs
 

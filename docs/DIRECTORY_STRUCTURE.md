@@ -73,7 +73,7 @@ src
 
 ---
 
-## 📖 Документация Terraform (Root)
+## 📖 Документация Terraform
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
