@@ -33,13 +33,17 @@ cp terraform.tfvars.example terraform.tfvars
 #### Задание 1. Развертывание инфраструктуры в Yandex Cloud.
 
 - Создание Virtual Private Cloud (VPC)
+
 ![modules/vpc](images/сеть.png)
 
 - Создание подсети
+
 ![alt text](images/подсеть.png)
 
 - Создание виртуальные машины (VM):
+
 ![alt text](images/vm.png)
+
    - Настройка группы безопасности (порты 22, 80, 443)
 ![alt text](images/sg.png)
 ![alt text](images/sg.out.png)
