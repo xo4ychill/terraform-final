@@ -53,27 +53,26 @@ cp terraform.tfvars.example terraform.tfvars
 - Описание создания БД MySQL в Yandex Cloud
    - База данных разворачивается с использованием **Yandex Managed Service for MySQL**. Вся конфигурация описана в модуле `modules/mysql/main.tf`.
    - [Основные компоненты](src/modules/mysql/README.md)
-
          - Параметры кластера:
-                        - **Имя**: `{environment}-mysql-cluster` (например, `prod-mysql-cluster`)
-                        - **Версия MySQL**: `8.0` (можно изменить на `8.4`)
-                        - **Ресурсы**: `s2.micro` (2 vCPU, 8 ГБ RAM), диск 20 ГБ (HDD)
-                        - **Окружение**: `PRODUCTION` (для `prod`) или `PRESTABLE` (для `staging`/`dev`)
-                        - **Хост**: размещается в той же зоне доступности и подсети, что и виртуальная машина
-                        - **Публичный IP**: отключён (`assign_public_ip = false`) — доступ только из внутренней сети
-                        - **Резервное копирование**: ежедневно в 03:00 UTC
+          - **Имя**: `{environment}-mysql-cluster` (например, `prod-mysql-cluster`)
+          - **Версия MySQL**: `8.0` (можно изменить на `8.4`)
+          - **Ресурсы**: `s2.micro` (2 vCPU, 8 ГБ RAM), диск 20 ГБ (HDD)
+          - **Окружение**: `PRODUCTION` (для `prod`) или `PRESTABLE` (для `staging`/`dev`)
+          - **Хост**: размещается в той же зоне доступности и подсети, что и виртуальная машина
+          - **Публичный IP**: отключён (`assign_public_ip = false`) — доступ только из внутренней сети
+          - **Резервное копирование**: ежедневно в 03:00 UTC
          - Безопасность:
-                        - Кластер привязан к **группе безопасности**, которая разрешает входящий трафик на порт `3306` только с CIDR-блоков подсети приложения.
-                        - Пароль пользователя MySQL передаётся через защищённую переменную Terraform (`sensitive = true`) и не сохраняется в открытом виде в коде.
-                        - Включена защита от случайного удаления (`prevent_destroy = true`).
+          - Кластер привязан к **группе безопасности**, которая разрешает входящий трафик на порт `3306` только с CIDR-блоков подсети приложения.
+          - Пароль пользователя MySQL передаётся через защищённую переменную Terraform (`sensitive = true`) и не сохраняется в открытом виде в коде.
+          - Включена защита от случайного удаления (`prevent_destroy = true`).
          - Конфигурация MySQL:
-         ```hcl
+          ```hcl
                 mysql_config = {
                 innodb_buffer_pool_size = 1073741824   # 1 ГБ
                 max_connections         = 100
                 sql_mode                = "STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
                 }
-                
+          ```      
 
 
 - Описание создания Container Registry
