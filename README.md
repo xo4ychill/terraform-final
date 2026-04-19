@@ -94,9 +94,12 @@ cp terraform.tfvars.example terraform.tfvars
 ![alt text](images/docker_vm.png)
 
 #### Задание 3. Описание Docker файла  c web-приложением и сохранние контейнера в Container Registry.
-[Docker file](src/Dockerfile)
-[Файл зависимостей requirements.txt](src/requirements.txt)
-[Cохранние контейнера в Container Registry](scripts/docker-push.sh)
+- [Docker file](src/Dockerfile)
+
+- [Файл зависимостей requirements.txt](src/requirements.txt)
+
+- [Cохранние контейнера в Container Registry](scripts/docker-push.sh)
+
 ![alt text](images/docker_build.png)
 ![alt text](images/docker_build2.png)
 ![alt text](images/docker_check.png)
