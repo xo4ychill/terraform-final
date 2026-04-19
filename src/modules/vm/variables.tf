@@ -1,5 +1,5 @@
 variable "service_account_id" { 
-  description = "ID сервисного аккаунта для доступа к "
+  description = "ID сервисного аккаунта для доступа к Container Registry "
   type = string 
 }
 variable "vm_name" {
@@ -94,8 +94,3 @@ variable "registry_url" {
   type        = string
 }
 
-variable "sa_key_json"  {
-  description = "Токен сервисного аккаунта для скачивание из registry "
-  type = string
-  sensitive = true 
-}

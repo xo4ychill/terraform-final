@@ -1,9 +1,9 @@
 # ======================================================================
-# outputs.tf — Вывод полезной информации после развёртывания
+# outputs.tf — Вывод результатов после terraform apply
 # ======================================================================
 
 output "vm_external_ip" {
-  description = "Внешний IP-адрес виртуальной машины (для доступа по HTTP/SSH)"
+  description = "Внешний IP-адрес виртуальной машины"
   value       = module.vm.external_ip
 }
 
@@ -13,7 +13,7 @@ output "vm_internal_ip" {
 }
 
 output "mysql_cluster_id" {
-  description = "ID кластера MySQL"
+  description = "ID кластера Managed MySQL"
   value       = module.mysql.cluster_id
 }
 
@@ -24,11 +24,11 @@ output "mysql_connection_string" {
 }
 
 output "registry_url" {
-  description = "URL Container Registry для загрузки образов"
-  value       = local.registry_url
+  description = "URL Container Registry для docker push/pull"
+  value       = module.registry.registry_url
 }
 
-output "vm_service_account_id" {
-  description = "ID сервисного аккаунта, привязанного к ВМ"
-  value       = yandex_iam_service_account.vm_sa.id
+output "registry_id" {
+  description = "ID Container Registry"
+  value       = module.registry.registry_id
 }

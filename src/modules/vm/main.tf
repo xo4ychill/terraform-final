@@ -1,5 +1,5 @@
 # ======================================================================
-# Модуль VM — виртуальная машина с cloud-init и привязкой Security Group
+# Модуль VM — виртуальная машина с cloud-init
 # ======================================================================
 
 data "yandex_compute_image" "ubuntu" {
@@ -16,7 +16,6 @@ locals {
     DB_USER        = var.db_user
     DB_PASSWORD    = var.db_password
     REGISTRY_URL   = var.registry_url
-    SA_KEY_JSON    = base64encode(var.sa_key_json)   # Ключ в base64 для безопасной передачи
   })
 }
 
@@ -41,13 +40,13 @@ resource "yandex_compute_instance" "vm" {
 
   network_interface {
     subnet_id          = var.subnet_id
-    nat                = true   # Назначаем публичный IP
+    nat                = true   # Публичный IP
     security_group_ids = var.security_group_ids
   }
 
   metadata = {
-    user-data          = local.cloud_init_content  # Скрипт первоначальной настройки
-    serial-port-enable = 1
+    user-data          = local.cloud_init_content   # cloud-init скрипт
+    serial-port-enable = 1                          # Серийная консоль для отладки
   }
 
   scheduling_policy {

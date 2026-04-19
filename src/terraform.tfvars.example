@@ -1,43 +1,35 @@
-# ======================================================
-# ПРИМЕР ФАЙЛА ПЕРЕМЕННЫХ
-# Скопируйте в terraform.tfvars и заполните свои значения
-# ======================================================
+# ======================================================================
+# terraform.tfvars.example — ПРИМЕР ФАЙЛА ПЕРЕМЕННЫХ
+# Скопируйте в terraform.tfvars и заполните своими данными
+# ======================================================================
 
-# --- Yandex Cloud ---
-cloud_id                 = "b1g...."
-folder_id                = "b1g....."
+cloud_id                 = "b1gxxxxxxxxxxxxxxxx"
+folder_id                = "b1gxxxxxxxxxxxxxxxx"
 default_zone             = "ru-central1-a"
-service_account_key_file = "~/.authorized_key.json"
+service_account_key_file = "~/.config/yandex-cloud/sa-key.json"
 
-# --- Окружение ---
-environment = "dev"
+environment = "prod"
 
-# --- VPC ---
-vpc_name       = "app-net"
-subnet_name    = "app-sub"
-v4_cidr_blocks = ["10.10.10.0/24"]
+vpc_name       = "app-network"
+subnet_name    = "app-subnet"
+v4_cidr_blocks = ["192.168.10.0/24"]
 
-# --- Виртуальная машина ---
-vm_name    = "vm-app"
-image_family = "ubuntu-2204-lts"
-vm_cores   = 2
-vm_memory  = 4
-vm_disk_size = 20
-preemptible     = true                     # false для prod, true для dev/staging
+vm_name         = "vm-app"
+image_family    = "ubuntu-2204-lts"
+vm_cores        = 2
+vm_memory       = 4
+vm_disk_size    = 20
+preemptible     = false
 
+ssh_public_key    = "ssh-rsa AAAAB3NzaC1yc2EAAAA... your@email.com"
+allowed_ssh_cidr  = "85.32.xx.xx/32"
 
-# --- SSH ---
-ssh_public_key    = "ssh-ed25519 ....."
-allowed_ssh_cidr  = "x.x.x.x/x"
+# Сервисный аккаунт для ВМ (должен иметь роль container-registry.images.puller)
+vm_service_account_id = "aje1234567890abcdef"
 
-# --- MySQL ---
-mysql_version = "8.0"
-mysql_db_name = "appdb"
-mysql_user    = "appuser"
-mysql_password = "YourStrongPassword123!"                  
+mysql_version   = "8.0"
+mysql_db_name   = "appdb"
+mysql_user      = "appuser"
+mysql_password  = "YourStrongPassword123!"
 
-# --- Существующий Container Registry ---
-existing_registry_id = "crp1nhdjvh1pkotfi5l3"    # пример
-
-# --- S3 Backend ---
-state_bucket_name = "tf-state-bucket-xxxxxxxx"
+registry_name = "app-registry"

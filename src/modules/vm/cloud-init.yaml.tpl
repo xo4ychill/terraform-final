@@ -1,4 +1,8 @@
 #cloud-config
+# ======================================================================
+# Cloud-Init: автоматическая настройка ВМ с надёжной авторизацией в Registry
+# ======================================================================
+
 users:
   - name: yc-user
     groups: sudo, docker
@@ -16,16 +20,8 @@ packages:
   - gnupg
   - lsb-release
 
-write_files:
-  # Сохраняем ключ сервисного аккаунта в файл
-  - path: /home/yc-user/sa-key.json
-    content: ${SA_KEY_JSON}
-    encoding: b64
-    owner: 'yc-user:yc-user'
-    permissions: '0600'
-
 runcmd:
-  # Установка Docker
+  # ----- Установка Docker -----
   - |
     install -m 0755 -d /etc/apt/keyrings
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -35,24 +31,26 @@ runcmd:
     apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     systemctl enable --now docker containerd
 
-  # Настройка Docker Credential Helper с ключом сервисного аккаунта
+  # ----- Установка YC CLI и настройка Docker Credential Helper -----
   - |
-    # Установка YC CLI
     curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -n
     echo 'export PATH="$HOME/bin:$PATH"' >> /home/yc-user/.bashrc
-    
-    # Создание профиля с ключом сервисного аккаунта
-    sudo -u yc-user /home/yc-user/bin/yc config profile create sa-profile
-    sudo -u yc-user /home/yc-user/bin/yc config set service-account-key /home/yc-user/sa-key.json
-    
-    # Настройка Docker Credential Helper
-    sudo -u yc-user /home/yc-user/bin/yc container registry configure-docker
+    # Ждём, пока метаданные станут доступны (иногда нужно время)
+    for i in {1..10}; do
+      IAM_TOKEN=$(curl -s -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token | jq -r .access_token)
+      if [ -n "$IAM_TOKEN" ] && [ "$IAM_TOKEN" != "null" ]; then
+        sudo -u yc-user /home/yc-user/bin/yc config set token "$IAM_TOKEN"
+        sudo -u yc-user /home/yc-user/bin/yc container registry configure-docker
+        break
+      fi
+      sleep 5
+    done
 
-  # Создание рабочего каталога
+  # ----- Создание рабочего каталога -----
   - mkdir -p /opt/app
   - chown yc-user:yc-user /opt/app
 
-  # .env файл с переменными окружения
+  # ----- .env файл -----
   - |
     cat > /opt/app/.env << ENVEOF
     DB_HOST=${DB_HOST}
@@ -65,18 +63,41 @@ runcmd:
     chmod 600 /opt/app/.env
     chown yc-user:yc-user /opt/app/.env
 
-  # Скрипт запуска контейнера 
+  # ----- Скрипт запуска с гарантированной авторизацией -----
   - |
     cat > /opt/app/start-app.sh << 'SCRIPTEOF'
     #!/bin/bash
     set -e
     cd /opt/app
+
+    # Функция для docker login с IAM-токеном
+    docker_login() {
+      IAM_TOKEN=$(curl -s -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token | jq -r .access_token)
+      if [ -n "$IAM_TOKEN" ] && [ "$IAM_TOKEN" != "null" ]; then
+        echo "$IAM_TOKEN" | docker login --username iam --password-stdin cr.yandex > /dev/null 2>&1
+        return 0
+      else
+        return 1
+      fi
+    }
+
+    # Пытаемся авторизоваться (до 5 попыток с интервалом 15 сек)
+    for i in {1..5}; do
+      if docker_login; then
+        echo "✅ Docker авторизован в Container Registry"
+        break
+      fi
+      echo "⏳ Ожидание IAM-токена... попытка $i"
+      sleep 15
+    done
+
+    # Запускаем приложение
     docker compose up -d
     SCRIPTEOF
     chmod +x /opt/app/start-app.sh
     chown yc-user:yc-user /opt/app/start-app.sh
 
-  # docker-compose.yml
+  # ----- docker-compose.yml -----
   - |
     cat > /opt/app/docker-compose.yml << 'COMPOSEEOF'
     services:
@@ -106,7 +127,7 @@ runcmd:
     COMPOSEEOF
     chown yc-user:yc-user /opt/app/docker-compose.yml
 
-  # Systemd-сервис для автоматического запуска при старте ВМ
+  # ----- systemd сервис -----
   - |
     cat > /etc/systemd/system/app.service << 'SYSTEMDEOF'
     [Unit]
@@ -127,4 +148,4 @@ runcmd:
     systemctl daemon-reload
     systemctl enable app.service
 
-final_message: "🎉 FastAPI приложение настроено и готово к работе!"
+final_message: "🎉 FastAPI приложение готово к работе!"

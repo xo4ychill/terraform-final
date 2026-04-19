@@ -1,80 +1,3 @@
-# 📦 Terraform Infrastructure
-
----
-
-## 📚 Автоматически сгенерированная документация
-
----
-
-## 🌳 Структура проекта
-
-```
-src
-├── app
-│   └── main.py
-├── Dockerfile
-├── .dockerignore
-├── main.tf
-├── modules
-│   ├── mysql
-│   │   ├── main.tf
-│   │   ├── output.tf
-│   │   ├── providers.tf
-│   │   ├── README.md
-│   │   └── variables.tf
-│   ├── registry
-│   │   ├── main.tf
-│   │   ├── outputs.tf
-│   │   ├── providers.tf
-│   │   ├── README.md
-│   │   └── variables.tf
-│   ├── security
-│   │   ├── main.tf
-│   │   ├── output.tf
-│   │   ├── providers.tf
-│   │   ├── README.md
-│   │   └── variables.tf
-│   ├── vm
-│   │   ├── cloud-init.yaml.tpl
-│   │   ├── main.tf
-│   │   ├── output.tf
-│   │   ├── providers.tf
-│   │   ├── README.md
-│   │   └── variables.tf
-│   └── vpc
-│       ├── main.tf
-│       ├── output.tf
-│       ├── providers.tf
-│       ├── README.md
-│       └── variables.tf
-├── output.tf
-├── providers.tf
-├── README.md
-├── requirements.txt
-├── .terraform.lock.hcl
-├── terraform.tfvars
-└── variables.tf
-```
-
----
-
-## 📘 Пояснения к структуре
-
-| Путь | Описание |
-|------|----------|
-| `src/main.tf` | Точка входа: объединяет все модули |
-| `src/providers.tf` | Настройка провайдеров и backend |
-| `src/variables.tf` | Входные переменные |
-| `src/terraform.tfvars` | Значения переменных |
-| `src/output.tf` | Выходные значения |
-| `src/modules/` | Каталог всех Terraform модулей |
-
-
-
----
-
-## 📖 Документация Terraform (Root)
-
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -91,11 +14,11 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_mysql"></a>  [ mysql](../src/modules/mysql/README.md) | ./modules/mysql | n/a |
-| <a name="module_registry"></a> [registry](../src/modules/registry/README.md) | ./modules/registry | n/a |
-| <a name="module_security"></a> [security](../src/modules/security/README.md) | ./modules/security | n/a |
-| <a name="module_vm"></a> [vm](../src/modules/vm/README.md) | ./modules/vm | n/a |
-| <a name="module_vpc"></a> [vpc](../src/modules/vpc/README.md) | ./modules/vpc | n/a |
+| <a name="module_mysql"></a> [mysql](#module\_mysql) | ./modules/mysql | n/a |
+| <a name="module_registry"></a> [registry](#module\_registry) | ./modules/registry | n/a |
+| <a name="module_security"></a> [security](#module\_security) | ./modules/security | n/a |
+| <a name="module_vm"></a> [vm](#module\_vm) | ./modules/vm | n/a |
+| <a name="module_vpc"></a> [vpc](#module\_vpc) | ./modules/vpc | n/a |
 
 ## Resources
 
@@ -121,7 +44,7 @@ No resources.
 | <a name="input_preemptible"></a> [preemptible](#input\_preemptible) | Использовать прерываемую ВМ | `bool` | `false` | no |
 | <a name="input_registry_name"></a> [registry\_name](#input\_registry\_name) | Имя Container Registry | `string` | `"app-registry"` | no |
 | <a name="input_subnet_name"></a> [subnet\_name](#input\_subnet\_name) | Имя подсети | `string` | `"app-subnet"` | no |
-| <a name="input_v4_cidr_blocks"></a> [v4\_cidr\_blocks](#input\_v4\_cidr\_blocks) | CIDR-блок подсети | `list(string)` | <pre>[<br/>  "10.10.10.0/24"<br/>]</pre> | no |
+| <a name="input_v4_cidr_blocks"></a> [v4\_cidr\_blocks](#input\_v4\_cidr\_blocks) | CIDR-блок подсети | `list(string)` | <pre>[<br/>  "192.168.10.0/24"<br/>]</pre> | no |
 | <a name="input_vm_cores"></a> [vm\_cores](#input\_vm\_cores) | Количество vCPU | `number` | `2` | no |
 | <a name="input_vm_disk_size"></a> [vm\_disk\_size](#input\_vm\_disk\_size) | Размер диска (ГБ) | `number` | `20` | no |
 | <a name="input_vm_memory"></a> [vm\_memory](#input\_vm\_memory) | Объём ОЗУ (ГБ) | `number` | `4` | no |

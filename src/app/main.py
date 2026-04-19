@@ -1,3 +1,7 @@
+# ======================================================================
+# FastAPI приложение с подключением к MySQL
+# ======================================================================
+
 from datetime import datetime
 import os
 from contextlib import contextmanager, asynccontextmanager

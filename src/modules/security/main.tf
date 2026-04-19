@@ -8,7 +8,7 @@ resource "yandex_vpc_security_group" "sg" {
   description = var.description
   network_id  = var.network_id
 
-  # SSH доступ (только если задан CIDR)
+  # SSH (только если задан CIDR)
   dynamic "ingress" {
     for_each = var.allowed_ssh_cidr != null ? [1] : []
     content {
@@ -19,6 +19,7 @@ resource "yandex_vpc_security_group" "sg" {
     }
   }
 
+  # HTTP (публичный доступ)
   ingress {
     description    = "HTTP"
     protocol       = "TCP"
@@ -26,14 +27,15 @@ resource "yandex_vpc_security_group" "sg" {
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # HTTPS (публичный доступ)
   ingress {
-    description    = "HTTPS"
+    description    = "HTTP"
     protocol       = "TCP"
     port           = 443
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # MySQL — только из подсети приложения
+  # MySQL (только из подсети приложения)
   ingress {
     description    = "MySQL"
     protocol       = "TCP"
@@ -41,7 +43,7 @@ resource "yandex_vpc_security_group" "sg" {
     v4_cidr_blocks = var.app_subnet_cidrs
   }
 
-  # Исходящий трафик
+  # Исходящий трафик (необходим для работы Docker и обновлений)
   egress {
     description    = "HTTPS out"
     protocol       = "TCP"
@@ -59,6 +61,12 @@ resource "yandex_vpc_security_group" "sg" {
     protocol       = "UDP"
     port           = 53
     v4_cidr_blocks = ["0.0.0.0/0"]
+  }
+    egress {
+    description    = "MySQL out"
+    protocol       = "TCP"
+    port           = 3306
+    v4_cidr_blocks = var.app_subnet_cidrs   # можно ограничить только подсетью MySQL
   }
 
   labels = {

@@ -1,86 +1,62 @@
 #!/usr/bin/env bash
-
 # ======================================================================
 # 🚀 Terraform Registry-Level Documentation Generator
 # ======================================================================
-# Назначение:
-#   Генерация полной документации Terraform проекта:
-#
-#   1. Root документация (docs/DIRECTORY_STRUCTURE.md)
-#      - содержит дерево проекта
-#      - содержит описание структуры
-#      - содержит terraform-docs блок
-#
-#   2. Документация модулей (src/modules/*/README.md)
-#      - registry-style формат
-#      - автоматически обновляется
-#
-#   3. Скрипт размещён в папке scripts/ корневого каталога проекта.
-#      Файлы конфигурации должны лежать в корне проекта:
-#                       .terraform-docs.yml 
-#                       .terraform-docs-module.yml
+# Назначение: Генерация документации root-конфига и всех модулей.
+# Расположение: Должен находиться в папке scripts/ корневого каталога.
+# Зависимости: terraform, terraform-docs, tree (опционально)
 # ======================================================================
 
 set -euo pipefail
 
 # ======================================================================
-# 📁 Определение путей проекта
+# 📁 Определение путей (работает из любой рабочей директории)
 # ======================================================================
-# Скрипт находится в scripts/, поэтому поднимаемся на уровень вверх к корню проекта
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 SRC_DIR="${ROOT_DIR}/src"
 MODULES_DIR="${SRC_DIR}/modules"
-
-# Конфиги terraform-docs (лежат в корне)
 ROOT_CONFIG="${ROOT_DIR}/.terraform-docs.yml"
 MODULE_CONFIG="${ROOT_DIR}/.terraform-docs-module.yml"
-
-# Папка документации
 DOCS_DIR="${ROOT_DIR}/docs"
 ROOT_DOC="${DOCS_DIR}/DIRECTORY_STRUCTURE.md"
 
 echo "🏆 Terraform Docs Generator"
-echo "📁 ROOT: ${ROOT_DIR}"
+echo "📁 Project Root: ${ROOT_DIR}"
 
 # ======================================================================
-# 🔍 Проверка наличия terraform-docs
+# 🔍 Проверка зависимостей
 # ======================================================================
 if ! command -v terraform-docs >/dev/null 2>&1; then
   echo "❌ terraform-docs не установлен"
-  echo "👉 Установи: brew install terraform-docs / go install github.com/terraform-docs/terraform-docs@latest"
+  echo "👉 Установка: brew install terraform-docs || go install github.com/terraform-docs/terraform-docs@latest"
   exit 1
 fi
-
 echo "✅ terraform-docs: $(terraform-docs --version)"
+
+TREE_AVAILABLE=false
+command -v tree >/dev/null 2>&1 && TREE_AVAILABLE=true
 
 # ======================================================================
 # 📦 Проверка конфигурационных файлов
 # ======================================================================
-[ -f "${ROOT_CONFIG}" ] || { echo "❌ отсутствует ${ROOT_CONFIG}"; exit 1; }
-[ -f "${MODULE_CONFIG}" ] || { echo "❌ отсутствует ${MODULE_CONFIG}"; exit 1; }
+[ -f "${ROOT_CONFIG}" ] || { echo "❌ Отсутствует: ${ROOT_CONFIG}"; exit 1; }
+[ -f "${MODULE_CONFIG}" ] || { echo "❌ Отсутствует: ${MODULE_CONFIG}"; exit 1; }
 
-# ======================================================================
-# 📁 Создание директории docs (если нет)
-# ======================================================================
 mkdir -p "${DOCS_DIR}"
 
 # ======================================================================
-# 📄 СОЗДАНИЕ ROOT ДОКУМЕНТАЦИИ
+# 📄 Создание скелета ROOT документации (если файла нет)
 # ======================================================================
-if [ ! -f "${ROOT_DOC}" ]; then
+if [[ ! -f "${ROOT_DOC}" ]]; then
+  echo "🆕 Создаём структуру root документации..."
+  
+  PROJECT_TREE="[tree не установлен или директория src отсутствует]"
+  if [[ "$TREE_AVAILABLE" == true && -d "${SRC_DIR}" ]]; then
+    PROJECT_TREE=$(cd "${ROOT_DIR}" && tree -a -I '.git|.terraform|node_modules|*.tfstate*|docs|.idea|*.lock|*.yaml|*.yml|*.tfvars.example' src --noreport 2>/dev/null) || true
+  fi
 
-  echo "🆕 Создаём root документацию..."
-
-  # ------------------------------------------------------------------
-  # 🌳 Генерация дерева проекта (используем cd для корректных относительных путей)
-  # ------------------------------------------------------------------
-  PROJECT_TREE=$(cd "${ROOT_DIR}" && tree -a -I '.git|.terraform|node_modules|*.tfstate*|docs|.idea|*.lock|*.yaml|*.yml|*.tfvars.example' src --noreport 2>/dev/null || echo "[tree не установлен или src отсутствует]")
-
-  # ------------------------------------------------------------------
-  # 📝 Создание файла документации
-  # ------------------------------------------------------------------
   cat > "${ROOT_DOC}" <<EOF
 # 📦 Terraform Infrastructure
 
@@ -90,7 +66,7 @@ if [ ! -f "${ROOT_DOC}" ]; then
 
 ---
 
-## 🌳 Структура проекта (без root каталога)
+## 🌳 Структура проекта
 
 \`\`\`
 ${PROJECT_TREE}
@@ -108,29 +84,34 @@ ${PROJECT_TREE}
 | \`src/terraform.tfvars\` | Значения переменных |
 | \`src/output.tf\` | Выходные значения |
 | \`src/modules/\` | Каталог всех Terraform модулей |
-| \`src/modules/vpc\` | Создание сети (VPC, подсети) |
-| \`src/modules/vm\` | Виртуальные машины + cloud-init |
-| \`src/modules/mysql\` | Управляемая база данных |
-| \`src/modules/security\` | Группы безопасности |
+
 
 
 ---
 
-## 📖 Документация Terraform
+## 📖 Документация Terraform (Root)
 
 <!-- BEGIN_TF_DOCS -->
 <!-- END_TF_DOCS -->
 EOF
-
 fi
 
 # ======================================================================
-# ⚙️ ГЕНЕРАЦИЯ ROOT ДОКУМЕНТАЦИИ (terraform-docs)
+# ⚙️ ГЕНЕРАЦИЯ ROOT ДОКУМЕНТАЦИИ
 # ======================================================================
-echo "⚙️ Генерация ROOT документации..."
+echo "⚙️ Подготовка и генерация ROOT документации..."
 
+# 1. Безопасный init для корректного парсинга версий провайдеров и ресурсов
+if [[ -d "${SRC_DIR}" ]] && shopt -s nullglob; tf_files=("${SRC_DIR}"/*.tf); shopt -u nullglob; [[ ${#tf_files[@]} -gt 0 ]]; then
+  echo "🔄 Запуск terraform init (без backend)..."
+  terraform -chdir="${SRC_DIR}" init -backend=false -input=false -no-color &>/dev/null || echo "⚠️  terraform init пропущен (не критично)"
+fi
+
+# 2. Генерация с явным переопределением пути вывода (игнорирует возможные ../ в конфиге)
 terraform-docs \
   --config "${ROOT_CONFIG}" \
+  --output-file "${ROOT_DOC}" \
+  --output-mode inject \
   "${SRC_DIR}"
 
 echo "✅ ROOT документация обновлена"
@@ -140,62 +121,53 @@ echo "✅ ROOT документация обновлена"
 # ======================================================================
 echo "⚙️ Генерация документации модулей..."
 
-# Проверяем, существует ли директория модулей
-if [ -d "${MODULES_DIR}" ]; then
-  for module in "${MODULES_DIR}"/*; do
-    # пропускаем если это не директория
-    [ -d "${module}" ] || continue
-
+if [[ ! -d "${MODULES_DIR}" ]]; then
+  echo "⚠️  Директория модулей не найдена: ${MODULES_DIR}"
+else
+  for module in "${MODULES_DIR}"/*/; do
+    [[ -d "${module}" ]] || continue
     module_name=$(basename "${module}")
     readme="${module}/README.md"
 
-    echo ""
-    echo "📦 Обрабатываем модуль: ${module_name}"
+    echo "📦 Обработка модуля: ${module_name}"
 
-    # ------------------------------------------------------------------
-    # 📝 Создание README (registry-style)
-    # ------------------------------------------------------------------
-    cat > "${readme}" <<EOF
+    # Создание заглушки README, если отсутствует
+    if [[ ! -f "${readme}" ]]; then
+      cat > "${readme}" <<EOF
 # Terraform Module: ${module_name}
 
 ---
 
 ## 📌 Описание
-
 Модуль инфраструктуры: **${module_name}**
 
 ---
 
 ## 📚 Документация
-
 <!-- BEGIN_TF_DOCS -->
 <!-- END_TF_DOCS -->
 EOF
+    fi
 
-    # ------------------------------------------------------------------
-    # ⚙️ Генерация terraform-docs для модуля
-    # ------------------------------------------------------------------
+    # Генерация документации модуля
     terraform-docs \
       --config "${MODULE_CONFIG}" \
+      --output-file "${readme}" \
+      --output-mode inject \
       "${module}"
 
-    echo "✅ ${module_name} документация обновлена"
+    echo "✅ ${module_name} готово"
   done
-else
-  echo "⚠️  Директория модулей не найдена: ${MODULES_DIR}"
 fi
 
 # ======================================================================
-# 🔍 Git diff (если используется git)
+# 🔍 Git статус (опционально)
 # ======================================================================
 if command -v git >/dev/null 2>&1 && git -C "${ROOT_DIR}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   echo ""
-  echo "🔍 Проверка изменений в docs..."
+  echo "🔍 Изменения в документации:"
   git -C "${ROOT_DIR}" --no-pager diff --stat -- "${DOCS_DIR}" || true
 fi
 
-# ======================================================================
-# 🎉 Завершение
-# ======================================================================
 echo ""
 echo "🏆 ГОТОВО: документация успешно сгенерирована"
