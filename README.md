@@ -147,6 +147,7 @@ export AWS_SECRET_ACCESS_KEY=<Ваш secret>
 - [Файл зависимостей requirements.txt](src/requirements.txt)
 
 - [Cохранние контейнера в Container Registry](scripts/docker-push.sh)
+
 ```../scripts/docker-push.sh $(terraform output -raw registry_url) latest```
 
 ![alt text](images/docker_build.png)
