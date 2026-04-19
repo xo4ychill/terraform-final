@@ -158,9 +158,9 @@ export AWS_SECRET_ACCESS_KEY=<Ваш secret>
 #### Задание 4. Завязываем работу приложения в контейнере на БД в Yandex Cloud.
 - [Docker-compose.yml](src/docker-compose.yml)
 - Проверка соединения с БД и работы web-приложения
-Смотрим FQDN mysql сервера ```terraform output mysql_connection_string```
-Подключаемся к ВМ по ssh (```ssh -l yc-user $(terraform output -raw vm_external_ip)```)
-смотрим работу сервиса app.service ``` sudo systemctl status app.service```
-через mysql-client (```sudo apt install mysql-client```) проверяем соединение с БД
+    - Смотрим FQDN mysql сервера ```terraform output mysql_connection_string```
+    - Подключаемся к ВМ по ssh (```ssh -l yc-user $(terraform output -raw vm_external_ip)```)
+    - Смотрим работу сервиса app.service ``` sudo systemctl status app.service```
+    - Используя mysql-client (```sudo apt install mysql-client```) проверяем соединение с БД
 ```mysql -h rc1a-ie1kmg2gela0etjb.mdb.yandexcloud.net -P 3306 -u appuser -p```
 ![alt text](images/mysql.png)
