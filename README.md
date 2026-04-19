@@ -12,7 +12,7 @@
 #### Структура проекта 
 - [Структура проекта и Документация Terraform](docs/DIRECTORY_STRUCTURE.md)
 
-#### 🚀 Инструкция по развёртыванию
+####  Инструкция по развёртыванию
 
 ###  Подготовка
 
@@ -68,13 +68,38 @@ cp terraform.tfvars.example terraform.tfvars
                 max_connections         = 100
                 sql_mode                = "STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
                 }
-                ```
+                
 
 
 - Описание создания Container Registry
+    - Для хранения Docker-образов приложения в проекте используется **Yandex Container Registry**. Создание реестра описано в модуле `modules/registry/main.tf`.
+    - [Основные компоненты](src/modules/registry/README.md)
+    - Параметры реестра:
+    ```hcl
+                resource "yandex_container_registry" "registry" {
+                  name      = var.name              # Имя реестра (например, "app-registry")
+                        folder_id = var.folder_id         # ID каталога Yandex Cloud
+
+                labels = {
+                environment = var.environment   # prod / staging / dev
+                managed_by  = "terraform"       # Метка для идентификации управления
+                        }
+                }
+                
+
 
 #### Задание 2. Используя user-data (cloud-init), установливаем Docker и Docker Compose.
+[cloud-init](src/modules/vm/cloud-init.yaml.tpl)
+![alt text](images/cloud-init.png)
+![alt text](images/docker_vm.png)
 
 #### Задание 3. Описание Docker файла  c web-приложением и сохранние контейнера в Container Registry.
+[Docker file](src/Dockerfile)
+[Файл зависимостей requirements.txt](src/requirements.txt)
+[Cохранние контейнера в Container Registry](scripts/docker-push.sh)
+![alt text](images/docker_build.png)
+![alt text](images/docker_build2.png)
+![alt text](images/docker_check.png)
 
 #### Задание 4. Завязываем работу приложения в контейнере на БД в Yandex Cloud.
+[Docker-compose.yml](src/docker-compose.yml)

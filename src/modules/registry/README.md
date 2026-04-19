@@ -26,7 +26,7 @@
 
 | Name | Type |
 |------|------|
-| [yandex_container_registry.registry](https://registry.terraform.io/providers/yandex-cloud/yandex/latest/docs/resources/container_registry) | resource |
+| [yandex_container_registry.registry](https://registry.terraform.io/providers/yandex-cloud/yandex/latest/docs/resources/container_registry) | Создаёт приватный реестр для хранения Docker-образов |
 
 ## Inputs
 
