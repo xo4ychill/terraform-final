@@ -34,18 +34,21 @@ cp terraform.tfvars.example terraform.tfvars
 
 - Создание Virtual Private Cloud (VPC)
 ![modules/vpc](images/сеть.png)
+
 - Создание подсети
 ![modules/vpc](images/подсеть.png)
+
 - Создание виртуальные машины (VM):
 ![alt text](images/vm.png)
-  - Настройка группы безопасности (порты 22, 80, 443)
+   - Настройка группы безопасности (порты 22, 80, 443)
 ![alt text](images/sg.png)
 ![alt text](images/sg.out.png)
    - Привязываем группу безопасности к VM
 ![alt text](images/vm.2.png)
+
 - Описание создания БД MySQL в Yandex Cloud
-        - База данных разворачивается с использованием **Yandex Managed Service for MySQL**. Вся конфигурация описана в модуле `modules/mysql/main.tf`.
-        - [Основные компоненты](src/modules/mysql/README.md)
+   - База данных разворачивается с использованием **Yandex Managed Service for MySQL**. Вся конфигурация описана в модуле `modules/mysql/main.tf`.
+   - [Основные компоненты](src/modules/mysql/README.md)
         - Параметры кластера:
                         - **Имя**: `{environment}-mysql-cluster` (например, `prod-mysql-cluster`)
                         - **Версия MySQL**: `8.0` (можно изменить на `8.4`)
@@ -59,12 +62,13 @@ cp terraform.tfvars.example terraform.tfvars
                         - Пароль пользователя MySQL передаётся через защищённую переменную Terraform (`sensitive = true`) и не сохраняется в открытом виде в коде.
                         - Включена защита от случайного удаления (`prevent_destroy = true`).
         - Конфигурация MySQL:
-        - ```hcl
-mysql_config = {
-  innodb_buffer_pool_size = 1073741824   # 1 ГБ
-  max_connections         = 100
-  sql_mode                = "STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
-}
+        ```hcl
+                mysql_config = {
+                innodb_buffer_pool_size = 1073741824   # 1 ГБ
+                max_connections         = 100
+                sql_mode                = "STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
+                }
+                ```
 
 
 - Описание создания Container Registry
