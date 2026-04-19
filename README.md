@@ -53,6 +53,7 @@ cp terraform.tfvars.example terraform.tfvars
 - Описание создания БД MySQL в Yandex Cloud
    - База данных разворачивается с использованием **Yandex Managed Service for MySQL**. Вся конфигурация описана в модуле `modules/mysql/main.tf`.
    - [Основные компоненты](src/modules/mysql/README.md)
+
          - Параметры кластера:
                         - **Имя**: `{environment}-mysql-cluster` (например, `prod-mysql-cluster`)
                         - **Версия MySQL**: `8.0` (можно изменить на `8.4`)
