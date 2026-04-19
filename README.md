@@ -160,7 +160,7 @@ export AWS_SECRET_ACCESS_KEY=<Ваш secret>
 - Проверка соединения с БД и работы web-приложения
     - Смотрим FQDN mysql сервера ```terraform output mysql_connection_string```
     - Подключаемся к ВМ по ssh (```ssh -l yc-user $(terraform output -raw vm_external_ip)```)
-    - Смотрим работу сервиса app.service ``` sudo systemctl status app.service```
+    - Смотрим работу сервиса app.service ``` sudo systemctl status app.service``` (после деплоя Docker образа в Registry потребуется некоторое время, пока app.service скачает и запустит docker compose, но не более 3-5 минут)
     - Используя mysql-client (```sudo apt install mysql-client```) проверяем соединение с БД
 ```mysql -h rc1a-ie1kmg2gela0etjb.mdb.yandexcloud.net -P 3306 -u appuser -p```
 ![alt text](images/mysql.png)
