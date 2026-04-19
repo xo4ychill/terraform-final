@@ -36,7 +36,7 @@ cp terraform.tfvars.example terraform.tfvars
 ![modules/vpc](images/сеть.png)
 
 - Создание подсети
-![modules/vpc](images/подсеть.png)
+![alt text](images/подсеть.png)
 
 - Создание виртуальные машины (VM):
 ![alt text](images/vm.png)
