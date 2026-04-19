@@ -29,7 +29,7 @@ resource "yandex_vpc_security_group" "sg" {
 
   # HTTPS (публичный доступ)
   ingress {
-    description    = "HTTP"
+    description    = "HTTPS"
     protocol       = "TCP"
     port           = 443
     v4_cidr_blocks = ["0.0.0.0/0"]
