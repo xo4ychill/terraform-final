@@ -8,7 +8,7 @@
 -  Создание Virtual Private Cloud (VPC)
 ![modules/vpc](images/сеть.png)
 -  Создание подсети
-![modules/vpc](images/подсеть.png)
+  ![modules/vpc](images/подсеть.png)
 -  Создание виртуальные машины (VM):
 ![alt text](images/vm.png)
         - Настройка группы безопасности (порты 22, 80, 443)
