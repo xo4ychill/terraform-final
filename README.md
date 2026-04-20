@@ -136,7 +136,7 @@ export AWS_SECRET_ACCESS_KEY=<Ваш secret>
                         }
                 }
                 
-#### Задание 2. Используя user-data (cloud-init), установливаем Docker и Docker Compose.
+#### Задание 2. Используя user-data (cloud-init), устанавливаем Docker и Docker Compose.
 [cloud-init](src/modules/vm/cloud-init.yaml.tpl)
 
 ![cloud-init](images/cloud-init!.png)
